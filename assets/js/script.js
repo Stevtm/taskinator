@@ -242,8 +242,76 @@ var saveTasks = function () {
 	localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
+var loadTasks = function () {
+	// retrieve the array of tasks from localStorage
+	tasks = localStorage.getItem("tasks");
+
+	// check if the value of tasks is null (no content in the array)
+	if (!tasks) {
+		tasks = [];
+		return false;
+	}
+
+	// parse the string back into an array of objects
+	tasks = JSON.parse(tasks);
+
+	// create loop to print tasks to page
+	for (var i = 0; i < tasks.length; i++) {
+		// reassign id property so they print in order
+		tasks[i].id = taskIdCounter;
+
+		// create <li> element
+		var listItemEl = document.createElement("li");
+		listItemEl.className = "task-item";
+		listItemEl.setAttribute("data-task-id", tasks[i].id);
+
+		// create div element
+		var taskInfoEl = document.createElement("div");
+		taskInfoEl.className = "task-info";
+		taskInfoEl.innerHTML =
+			"<h3 class='task-name'>" +
+			tasks[i].name +
+			"</h3><span class='task-type'>" +
+			tasks[i].type +
+			"</span>";
+
+		// append taskInfoEl to listItemEl
+		listItemEl.appendChild(taskInfoEl);
+
+		// create task actions
+		var taskActionsEl = createTaskActions(tasks[i].id);
+
+		// append taskActionsEl to listItemEl
+		listItemEl.appendChild(taskActionsEl);
+
+		// check if the task is to do
+		if (tasks[i].status === "to do") {
+			listItemEl.querySelector(
+				"select[name='status-change']"
+			).selectedIndex = 0;
+			tasksToDoEl.appendChild(listItemEl);
+		} else if (tasks[i].status === "in progress") {
+			listItemEl.querySelector(
+				"select[name='status-change']"
+			).selectedIndex = 1;
+			tasksInProgressEl.appendChild(listItemEl);
+		} else if (tasks[i].status === "completed") {
+			listItemEl.querySelector(
+				"select[name='status-change']"
+			).selectedIndex = 2;
+			tasksCompletedEl.appendChild(listItemEl);
+		}
+
+		taskIdCounter++;
+
+		console.log(listItemEl);
+	}
+};
+
 pageContentEl.addEventListener("click", taskButtonHandler);
 
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
 
 formEl.addEventListener("submit", taskFormHandler);
+
+loadTasks();
